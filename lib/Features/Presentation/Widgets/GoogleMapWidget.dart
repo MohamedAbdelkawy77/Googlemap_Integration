@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:googlemap/Features/Data/Models/place_model.dart';
 
-// map Id =16007166866186782288
+ 
 class Googlemapwidget extends StatefulWidget {
   const Googlemapwidget({super.key});
 
@@ -14,14 +16,27 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
   late CameraTargetBounds cameraTargetBounds;
   late GoogleMapController googleMapController;
   Set<Marker> markers = {};
+  Set<Polyline> polylines = {};
+  @override
+  void initState() {
+    super.initState();
+    cameraPosition = CameraPosition(
+        target: LatLng(29.223453944797, 30.890921638123807), zoom: 10);
+    cameraTargetBounds = CameraTargetBounds(LatLngBounds(
+        southwest: LatLng(29.302590281256727, 30.85925774374115),
+        northeast: LatLng(30.781084246879495, 28.669260565563302)));
+    initMarkes();
+    initpolylines();
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context ) {
     return Scaffold(
       body: Stack(
         children: [
           GoogleMap(
-            //cloudMapId: "7b45f98a05a8f360886451de",
+            polylines: polylines,
+            zoomControlsEnabled: false,
             onMapCreated: (controller) {
               // very very important
               googleMapController = controller;
@@ -29,14 +44,13 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
             },
             markers: markers,
             initialCameraPosition: cameraPosition,
-            cameraTargetBounds: cameraTargetBounds,
           ),
           Positioned(
             bottom: 20,
             child: ElevatedButton(
                 onPressed: () {
                   googleMapController.animateCamera(CameraUpdate.newLatLng(
-                      LatLng(29.144246329039845, 30.7768241879684)));
+                      LatLng(29.21362726982885, 30.909542715083166)));
                 },
                 child: Text("Change Location ")),
           )
@@ -45,37 +59,42 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    cameraPosition = CameraPosition(
-        target: LatLng(29.320185448120004, 30.834018834471525), zoom: 10);
-    cameraTargetBounds = CameraTargetBounds(LatLngBounds(
-        southwest: LatLng(29.259226706515292, 30.74275868096059),
-        northeast: LatLng(29.328088816630828, 30.895047338474143)));
-    initMarkes();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    googleMapController.dispose();
-  }
-
   void initmapstyle() async {
     var mapstyle = await DefaultAssetBundle.of(context)
         .loadString("assets/Map_Styles/night_map.Json");
     googleMapController.setMapStyle(mapstyle);
   }
 
-  void initMarkes() {
-    var mark1 = Marker(
-        markerId: MarkerId("1"),
-        position: LatLng(29.320185448120004, 30.834018834471525));
-    var mark2 = Marker(
-        markerId: MarkerId("2"),
-        position: LatLng(29.309805653261304, 30.843709785819456));
-    markers.add(mark1);
-    markers.add(mark2);
+  void initMarkes() async {
+    var customicon = await BitmapDescriptor.asset(
+        ImageConfiguration(size: Size(30, 30)), places[1].image);
+    var mrs = places.map((place) => Marker(
+        icon: customicon,
+        infoWindow: InfoWindow(
+          title: place.name,
+        ),
+        markerId: MarkerId(place.id.toString()),
+        position: place.latLng));
+    markers.addAll(mrs);
+    setState(() {});
+  }
+
+  void initpolylines() {
+    Polyline polyline = Polyline(
+        color: Colors.blue,
+        width: 6,
+        polylineId: PolylineId("1"),
+        points: [
+          LatLng(29.308874257231924, 30.842544291393864),
+          LatLng(29.303485361529475, 30.82245991066934),
+          LatLng(29.323392921115996, 30.871555063551508),
+        ]);
+    polylines.add(polyline);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    googleMapController.dispose();
   }
 }

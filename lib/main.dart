@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:googlemap/Features/Presentation/Widgets/GoogleMapWidget.dart';
 
 void main() {
-  runApp(DevicePreview(
-    builder: (context) => MapApp(),
-    enabled: true,
-  ));
+  // runApp(DevicePreview(
+  //   builder: (context) => MapApp(),
+  //   enabled: true,
+  // ));
+  runApp(MapApp());
 }
 
 class MapApp extends StatelessWidget {
@@ -14,10 +15,11 @@ class MapApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+       // theme: ThemeData.dark(),
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
-        home:Googlemapwidget()
+        home: Googlemapwidget()
         //home: MyHomePage()
-    );
+        );
   }
 }

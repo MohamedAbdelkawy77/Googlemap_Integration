@@ -52,6 +52,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/Map_Styles/night_map.Json
+    - assets/images/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
   # For details regarding adding assets from package dependencies, see
