@@ -30,10 +30,12 @@ environment:
 dependencies:
   cupertino_icons: ^1.0.8
   device_preview: ^1.3.1
+  easy_localization: ^3.0.8
   firebase_core: ^4.2.1
   flutter:
     sdk: flutter
   google_maps_flutter: ^2.12.3
+  location: ^8.0.1
   shared_preferences: ^2.5.4
 
 dev_dependencies:
@@ -51,8 +53,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/Map_Styles/night_map.Json
     - assets/images/
+    - assets/Map_Styles/
+    - assets/transliation/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
   # For details regarding adding assets from package dependencies, see

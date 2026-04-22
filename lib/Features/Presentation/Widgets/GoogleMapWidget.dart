@@ -1,9 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:googlemap/Core/const_translat.dart';
 import 'package:googlemap/Features/Data/Models/place_model.dart';
+import 'package:googlemap/Features/Data/Models/polygon_model.dart';
 
- 
 class Googlemapwidget extends StatefulWidget {
   const Googlemapwidget({super.key});
 
@@ -17,6 +18,7 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
   late GoogleMapController googleMapController;
   Set<Marker> markers = {};
   Set<Polyline> polylines = {};
+  Set<Polygon> polygons = {};
   @override
   void initState() {
     super.initState();
@@ -27,14 +29,16 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
         northeast: LatLng(30.781084246879495, 28.669260565563302)));
     initMarkes();
     initpolylines();
+    initpolygons();
   }
 
   @override
-  Widget build(BuildContext context ) {
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
           GoogleMap(
+            polygons: polygons,
             polylines: polylines,
             zoomControlsEnabled: false,
             onMapCreated: (controller) {
@@ -51,14 +55,15 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
                 onPressed: () {
                   googleMapController.animateCamera(CameraUpdate.newLatLng(
                       LatLng(29.21362726982885, 30.909542715083166)));
+                  context.setLocale(Locale("ar"));
                 },
-                child: Text("Change Location ")),
+                child: Text(ConstTranslat.changepass.tr())),
           )
         ],
       ),
     );
   }
-
+ 
   void initmapstyle() async {
     var mapstyle = await DefaultAssetBundle.of(context)
         .loadString("assets/Map_Styles/night_map.Json");
@@ -90,6 +95,22 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
           LatLng(29.323392921115996, 30.871555063551508),
         ]);
     polylines.add(polyline);
+  }
+
+  void initpolygons() {
+    Polygon polygon = Polygon(
+        fillColor: Colors.blueAccent.withAlpha(50),
+        strokeColor: Colors.cyan,
+        strokeWidth: 4,
+        polygonId: PolygonId("1"),
+        points: pointspolygon,
+        holes: [
+          holepolygon1,
+          holepolygon2,
+          holepolygon3,
+        ]);
+
+    polygons.add(polygon);
   }
 
   @override
