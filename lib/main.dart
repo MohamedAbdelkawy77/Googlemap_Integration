@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:googlemap/Features/Presentation/Widgets/GoogleMapWidget.dart';
 
- 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
@@ -10,8 +9,7 @@ void main() async {
   runApp(
     EasyLocalization(
         supportedLocales: [Locale('en'), Locale('ar')],
-        path:
-            'transliation',  
+        path: 'lib/Core/transliation',
         fallbackLocale: Locale('en'),
         child: MapApp()),
   );

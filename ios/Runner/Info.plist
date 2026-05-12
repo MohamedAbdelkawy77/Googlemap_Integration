@@ -16,6 +16,10 @@
 	<string>googlemap</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+<!--Location Premession  -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app needs location access while the app is in use.</string>
+<!--Location Premession  -->
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
