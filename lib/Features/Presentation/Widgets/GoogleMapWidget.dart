@@ -1,10 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:googlemap/Core/const_translat.dart';
 import 'package:googlemap/Core/utils/location_service.dart';
 import 'package:googlemap/Features/Data/Models/place_model.dart';
-import 'package:googlemap/Features/Data/Models/polygon_model.dart';
+import 'package:googlemap/Features/Presentation/Manager/prediction_places_cubit/prediction_places_cubit.dart';
+import 'package:googlemap/Features/Presentation/Widgets/search_place.dart';
 import 'package:location/location.dart';
 
 class Googlemapwidget extends StatefulWidget {
@@ -16,11 +18,8 @@ class Googlemapwidget extends StatefulWidget {
 
 class _GooglemapwidgetState extends State<Googlemapwidget> {
   late CameraPosition cameraPosition;
-  late CameraTargetBounds cameraTargetBounds;
   late GoogleMapController googleMapController;
   Set<Marker> markers = {};
-  Set<Polyline> polylines = {};
-  Set<Polygon> polygons = {};
   Location location = Location();
   late LocationService locationService = LocationService(location: location);
 
@@ -29,12 +28,8 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
     super.initState();
     cameraPosition = CameraPosition(
         target: LatLng(29.223453944797, 30.890921638123807), zoom: 10);
-    cameraTargetBounds = CameraTargetBounds(LatLngBounds(
-        southwest: LatLng(28.669260565563302, 28.669260565563302),
-        northeast: LatLng(30.781084246879495, 30.85925774374115)));
-    initMarkes();
-    initpolylines();
-    initpolygons();
+
+    //initMarkes();
   }
 
   @override
@@ -43,13 +38,13 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
       body: Stack(
         children: [
           GoogleMap(
-            // polygons: polygons,
-            // polylines: polylines,
+            zoomControlsEnabled: false,
             onMapCreated: (controller) {
               // very very important
               googleMapController = controller;
               initmapstyle();
-              inituserLocation();
+              getusercurrentLocation();
+              //inituserLocation();
             },
             markers: markers,
             initialCameraPosition: cameraPosition,
@@ -58,7 +53,8 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
             bottom: 20,
             child: ElevatedButton(
                 onPressed: () {}, child: Text(ConstTranslat.changepass.tr())),
-          )
+          ),
+          SearchPlace(),
         ],
       ),
     );
@@ -91,60 +87,50 @@ class _GooglemapwidgetState extends State<Googlemapwidget> {
     setState(() {});
   }
 
-  void initpolylines() {
-    Polyline polyline = Polyline(
-        color: Colors.blue,
-        width: 6,
-        polylineId: PolylineId("1"),
-        points: [
-          LatLng(29.308874257231924, 30.842544291393864),
-          LatLng(29.303485361529475, 30.82245991066934),
-          LatLng(29.323392921115996, 30.871555063551508),
-        ]);
-    polylines.add(polyline);
-  }
-
-  void initpolygons() {
-    Polygon polygon = Polygon(
-        fillColor: Colors.blueAccent.withAlpha(50),
-        strokeColor: Colors.cyan,
-        strokeWidth: 4,
-        polygonId: PolygonId("1"),
-        points: pointspolygon,
-        holes: [
-          holepolygon1,
-          holepolygon2,
-          holepolygon3,
-        ]);
-
-    polygons.add(polygon);
-  }
-
   void inituserLocation() async {
-    await locationService.serverLocation();
-    bool premission = await locationService.premessionLocation();
-    if (premission) {
-      locationService.getUserLocation().listen((streamlocation) {
-        userPositionStream(streamlocation);
-        addUsermarker(streamlocation);
-      });
-    } else {
-      print("user decline the premession");
-    }
+    locationService.getUserLocationstream().listen((streamlocation) {
+      userPositionStream(streamlocation);
+      addUsermarker(streamlocation);
+    });
   }
 
   void userPositionStream(LatLng streamlocation) {
-        CameraPosition newcamera = CameraPosition(target: streamlocation);
-    googleMapController
-        .animateCamera(CameraUpdate.newCameraPosition(newcamera));
+    CameraPosition newcamera = CameraPosition(target: streamlocation, zoom: 15);
+    // googleMapController
+    //     .animateCamera(CameraUpdate.newCameraPosition(newcamera));
+
+    googleMapController.animateCamera(CameraUpdate.newLatLng(streamlocation));
   }
 
-  void addUsermarker(LatLng streamlocation) {
-       Marker userMarker = Marker(
+  void addUsermarker(LatLng streamlocation) async {
+    var customicon = await BitmapDescriptor.asset(
+        ImageConfiguration(size: Size(30, 30)), places[0].image);
+    Marker userMarker = Marker(
+      icon: customicon,
       markerId: MarkerId("usermark"),
       position: streamlocation,
     );
-    markers.add(userMarker);
-    setState(() {});
+
+    setState(() {
+      markers.add(userMarker);
+    });
+  }
+
+  void getusercurrentLocation() async {
+    try {
+      var currentlocation = await locationService.getUserLocation();
+      LatLng userlocation =
+          LatLng(currentlocation.latitude!, currentlocation.longitude!);
+      googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(target: userlocation, zoom: 12)));
+      Marker usermarker = Marker(
+          markerId: MarkerId(
+            "usermarker",
+          ),
+          position: userlocation);
+      markers.add(usermarker);
+      setState(() {});
+    } on ExceptionserverEnable catch (e) {
+    } on ExceptionPermissionStatus catch (e) {}
   }
 }

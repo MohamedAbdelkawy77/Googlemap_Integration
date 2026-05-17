@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
@@ -12,28 +11,31 @@ class LocationService {
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
       if (!serviceEnabled) {
-        // erro bar not enable GPS in Phone
-        return;
+        throw ExceptionserverEnable();
       }
     }
   }
 
-  Future<bool> premessionLocation() async {
+  Future<void> premessionLocation() async {
     PermissionStatus permissionGranted;
     permissionGranted = await location.hasPermission();
     if (permissionGranted == PermissionStatus.deniedForever) {
-      return false;
+      throw ExceptionPermissionStatus();
     } else if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
-      return permissionGranted == PermissionStatus.granted;
-    } else {
-      return true;
+      if (permissionGranted != PermissionStatus.granted) {
+        throw ExceptionPermissionStatus();
+      }
     }
   }
 
-  Stream<LatLng> getUserLocation() async* {
-    location.changeSettings(distanceFilter: 3);
- 
+  Stream<LatLng> getUserLocationstream() async* {
+    await serverLocation();
+    await premessionLocation();
+    location.changeSettings(
+      distanceFilter: 3,
+    );
+
     await for (final locationData in location.onLocationChanged) {
       yield LatLng(
         locationData.latitude ?? 30.0,
@@ -41,4 +43,14 @@ class LocationService {
       );
     }
   }
+
+  Future<LocationData> getUserLocation() async {
+    await serverLocation();
+    await premessionLocation();
+    return await location.getLocation();
+  }
 }
+
+class ExceptionserverEnable implements Exception {}
+
+class ExceptionPermissionStatus implements Exception {}
